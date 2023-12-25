@@ -7,8 +7,8 @@ void chamfer_distance_forward_npu(Tensor XYZ1, Tensor XYZ2, Tensor dist1,
                                     Tensor dist2, Tensor idx1, Tensor idx2) {
   at::Tensor xyz1 = at::ones_like(XYZ1);
   at::Tensor xyz2 = at::ones_like(XYZ2);
-  xyz1 = XYZ1.transpose(1, 2);
-  xyz2 = XYZ2.transpose(1, 2);
+  xyz1 = XYZ1.transpose(1, 2).transpose(0, 1);
+  xyz2 = XYZ2.transpose(1, 2).transpose(0, 1);
   OpCommand cmd;
   cmd.Name("ChamferDistance")
       .Input(xyz1)
