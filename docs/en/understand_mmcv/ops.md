@@ -12,7 +12,7 @@ We implement common ops used in detection, segmentation, etc.
 | BoxIouRotated                | √   | √    | √   |     | √      |
 | BoxIouQuadri                 | √   | √    |     |     |        |
 | CARAFE                       |     | √    | √   |     |        |
-| ChamferDistance              |     | √    |     |     |        |
+| ChamferDistance              |     | √    |     |     | √      |
 | CrissCrossAttention          |     | √    |     |     |        |
 | ContourExpand                | √   |      |     |     |        |
 | ConvexIoU                    |     | √    |     |     |        |
