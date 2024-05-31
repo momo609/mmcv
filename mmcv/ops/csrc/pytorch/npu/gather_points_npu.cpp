@@ -27,8 +27,8 @@ void gather_points_backward_npu(int b, int c, int n, int npoints,
   at::Tensor grad_out_cast = grad_out;
   at::Tensor grad_points_cast = grad_points;
   if (grad_out.scalar_type() == at::ScalarType::Half) {
-    grad_out_cast = at_npu::native::custom_ops::npu_dtype_cast(grad_out, at::ScalarType::Float);
-    grad_points_cast = at_npu::native::custom_ops::npu_dtype_cast(grad_points, at::ScalarType::Float);
+    grad_out_cast = grad_out.to(at::kFloat);
+    grad_points_cast = grad_points.to(at::kFloat);
   }
   at::Tensor indices = idx;
   if (idx.scalar_type() != at::ScalarType::Int) {
@@ -71,7 +71,7 @@ void gather_points_backward_npu(int b, int c, int n, int npoints,
   grad_points_result = grad_points_result.transpose(1, 2);
   at::Tensor grad_points_result_cast = grad_points_result;
   if (grad_out.scalar_type() == at::ScalarType::Half) {
-    grad_points_result_cast = at_npu::native::custom_ops::npu_dtype_cast(grad_points_result, at::ScalarType::Float);
+    grad_points_result_cast = grad_points_result.to(at::kHalf);
   }
   grad_points.copy_(grad_points_result_cast);
 }
