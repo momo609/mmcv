@@ -63,6 +63,7 @@ class ThreeInterpolate(Function):
 
         ext_module.three_interpolate_backward(
             grad_out_data, idx, weight, grad_features.data, b=B, c=c, n=n, m=m)
+            
         return grad_features, None, None
 
 
