@@ -37,7 +37,8 @@ void three_interpolate_backward_npu(int b, int c, int n, int m,
   auto grad_x = at::unsqueeze(grad_out, 3);
   auto grad_y = at::unsqueeze(grad_points, 3);
 
-  EXEC_NPU_CMD(aclnnThreeInterpolateBackward, grad_x, idx, weight, m, grad_y);
+  EXEC_NPU_CMD(aclnnThreeInterpolateBackward, grad_x, idx, weight, m,
+               grad_y);
 
   auto output = at::squeeze(grad_y, 3);
   auto res = output.contiguous();
