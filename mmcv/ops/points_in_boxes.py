@@ -47,7 +47,7 @@ def points_in_boxes_part(points: Tensor, boxes: Tensor) -> Tensor:
     points_device = points.get_device()
     assert points_device == boxes.get_device(), \
         'Points and boxes should be put on the same device'
-    if points_device != 'npu':
+    if points.device.type != 'npu':
         if torch.cuda.current_device() != points_device:
             torch.cuda.set_device(points_device)
 
