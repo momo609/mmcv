@@ -30,10 +30,26 @@ class ThreeNN(Function):
             set to their corresponding top three nearest neighbors.
         """
         target = target.contiguous()
-        source = source.contiguous()
+        if source.device.type == 'npu':
+            source = source.transpose(2, 1).contiguous()
+        else:
+            source = source.contiguous()
 
         B, N, _ = target.size()
         m = source.size(1)
+        if source.device.type == 'npu':
+            # strict to fp32
+            dtype_ = source.dtype
+            if dtype_ == torch.float16:
+                target = target.float()
+                source = source.float()
+            dist = target.new_empty(B, N, m)
+            ext_module.three_nn_forward(target, source, dist, torch.Tensor([]), b=B, n=N, m=m)
+            dist2, idx = torch.topk(dist, 3, dim=2, largest=False, sorted=True)
+            dist2 = torch.sqrt(dist2)
+            if dtype_ == torch.float16:
+                dist2 = dist2.half()
+            return dist2, idx.type(torch.IntTensor)
         dist2 = target.new_empty(B, N, 3)
         idx = target.new_empty(B, N, 3, dtype=torch.int32)
 
