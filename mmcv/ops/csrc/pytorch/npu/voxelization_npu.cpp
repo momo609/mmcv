@@ -64,7 +64,7 @@ void dynamic_voxelize_forward_npu(const at::Tensor &points, at::Tensor &coors,
                                    const int NDim = 3) {
     uint32_t ptsNum = points.size(0);
     uint32_t ptsFeature = points.size(1);
-    at::Tensor pts = at::transpose(points, 0, 1);
+    at::Tensor pts = points.transpose(0,1).contiguous();
     at::Tensor ptsTrans = at::reshape(pts, {ptsNum, ptsFeature});
     float coors_min_x = coors_range[0];
     float coors_min_y = coors_range[1];
@@ -81,7 +81,7 @@ void dynamic_voxelize_forward_npu(const at::Tensor &points, at::Tensor &coors,
 
     EXEC_NPU_CMD(aclnnDynamicVoxelization, ptsTrans, coors_min_x, coors_min_y, coors_min_z, voxel_x, voxel_y, voxel_z,
         grid_x, grid_y, grid_z, coors);
-    coors.transpose_(0, 1);                           
+    coors = coors.transpose(0, 1).contiguous();                           
 }
 
 REGISTER_NPU_IMPL(hard_voxelize_forward_impl, hard_voxelize_forward_npu);
