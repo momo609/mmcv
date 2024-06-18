@@ -79,8 +79,8 @@ void dynamic_voxelize_forward_npu(const at::Tensor &points, at::Tensor &coors,
     float voxel_y = voxel_size[1];
     float voxel_z = voxel_size[2];
     
-    int32_t custom_round = [](float value) -> int {
-        int int_part = static_cast<int>(value);
+    auto custom_round = [](float value) -> int32_t {
+        int32_t int_part = static_cast<int32_t>(value);
         float fraction_part = value - int_part;
 
         if (fraction_part >= 0.5) {
