@@ -43,7 +43,8 @@ class _DynamicScatter(Function):
             unique_res = ads_c.unique_voxel(voxel_idx)
             num_voxels, uniqued_voxel_idx, prefix_sum, \
                 argsort_coor, _ = unique_res
-            voxel_coors = ads_c.voxel_to_point(uniqued_voxel_idx, [], [], 'XYZ')
+            voxel_coors = ads_c.voxel_to_point(uniqued_voxel_idx, 
+                                               [], [], 'XYZ')
             voxel_feats, \
                 compare_mask = ads_c.npu_dynamic_scatter(feats, coors,
                                                          prefix_sum,
