@@ -2,8 +2,12 @@
 using namespace NPU_NAME_SPACE;
 using namespace std;
 
-void roiaware_pool3d_forward_npu(Tensor rois, Tensor pts, Tensor pts_feature,
-    Tensor pts_idx_of_voxels, Tensor pooled_features, int pool_method)
+void roiaware_pool3d_forward_npu(int boxes_num, int pts_num, int channels,
+                                  int max_pts_each_voxel, int out_x, int out_y,
+                                  int out_z, const Tensor rois,
+                                  const Tensor pts, const Tensor pts_feature,
+                                  Tensor argmax, Tensor pts_idx_of_voxels,
+                                  Tensor pooled_features, int pool_method)
 {
     at::Tensor rois_cast = rois;
     at::Tensor pts_cast = pts;
@@ -18,12 +22,9 @@ void roiaware_pool3d_forward_npu(Tensor rois, Tensor pts, Tensor pts_feature,
         pooled_features_cast = pooled_features_cast.to(at::kFloat);
     }
 
-    uint32_t max_pts_each_voxel = pts_idx_of_voxels.size(4);
-    uint32_t outx = pts_idx_of_voxels.size(1);
-    uint32_t outy = pts_idx_of_voxels.size(2);
-    uint32_t outz = pts_idx_of_voxels.size(3);
-
-    EXEC_NPU_CMD(aclnnRoiawarePool3d, rois_cast, pts_cast, pts_feature_cast, mode, max_pts_each_voxel, outx, outy, outz, argmax, pts_idx_of_voxels, pooled_features_cast);
+    EXEC_NPU_CMD(aclnnRoiawarePool3d, rois_cast, pts_cast, pts_feature_cast,
+                 pool_method, max_pts_each_voxel, out_x, out_y, out_z, argmax,
+                 pts_idx_of_voxels, pooled_features_cast);
 
     if (dtype == at::kHalf) {
         pooled_features_cast = pooled_features_cast.to(at::kHalf);
@@ -32,15 +33,13 @@ void roiaware_pool3d_forward_npu(Tensor rois, Tensor pts, Tensor pts_feature,
     pooled_features.copy_(pooled_features_cast);
 }
 
-void roiaware_pool3d_backward_npu(Tensor pts_idx_of_voxels, Tensor argmax,
-    Tensor grad_out, Tensor grad_in, int pool_method)
+void roiaware_pool3d_backward_npu(int boxes_num, int out_x, int out_y,
+                                   int out_z, int channels,
+                                   int max_pts_each_voxel,
+                                   const Tensor pts_idx_of_voxels,
+                                   const Tensor argmax, const Tensor grad_out,
+                                   Tensor grad_in, int pool_method)
 {
-    int32_t boxes_num = grad_out.size(0);
-    int32_t out_x = grad_out.size(1);
-    int32_t out_y = grad_out.size(2);
-    int32_t out_z = grad_out.size(3);
-    int32_t channels = grad_out.size(4);
-    int32_t max_pts_per_voxel = pts_idx_of_voxels.size(4);
     int32_t npoints = grad_in.size(0);
 
     auto dtype = grad_out.dtype();
@@ -52,16 +51,15 @@ void roiaware_pool3d_backward_npu(Tensor pts_idx_of_voxels, Tensor argmax,
         grad_in_cast = grad_in_cast.to(at::kFloat);
     }
 
-    OpCommand cmd;
-
     if (pool_method == 0) {
         // maxpool3d
         EXEC_NPU_CMD(aclnnRoiawareMaxpool3dGrad, argmax, grad_out_cast, boxes_num,
             out_x, out_y, out_z, channels, npoints, grad_in_cast);
     } else if (pool_method == 1) {
         // avgpool3d
-        EXEC_NPU_CMD(aclnnRoiawareAvgpool3dGrad, pts_idx_of_voxels, grad_out_cast, boxes_num,
-            out_x, out_y, out_z, channels, npoints, max_pts_per_voxel, grad_in_cast);
+        EXEC_NPU_CMD(aclnnRoiawareAvgpool3dGrad, pts_idx_of_voxels, grad_out_cast,
+                     boxes_num, out_x, out_y, out_z, channels, npoints,
+                     max_pts_each_voxel, grad_in_cast);
     }
 
     if (dtype == at::kHalf) {
@@ -71,11 +69,19 @@ void roiaware_pool3d_backward_npu(Tensor pts_idx_of_voxels, Tensor argmax,
     grad_in.copy_(grad_in_cast);
 }
 
-void roiaware_pool3d_forward_npu(Tensor rois, Tensor pts, Tensor pts_feature,
-    Tensor pts_idx_of_voxels, Tensor pooled_features, int pool_method);
+void roiaware_pool3d_forward_impl(int boxes_num, int pts_num, int channels,
+                                  int max_pts_each_voxel, int out_x, int out_y,
+                                  int out_z, const Tensor rois,
+                                  const Tensor pts, const Tensor pts_feature,
+                                  Tensor argmax, Tensor pts_idx_of_voxels,
+                                  Tensor pooled_features, int pool_method);
 
-void roiaware_pool3d_backward_impl(Tensor pts_idx_of_voxels, Tensor argmax,
-    Tensor grad_out, Tensor grad_in, int pool_method);
+void roiaware_pool3d_backward_impl(int boxes_num, int out_x, int out_y,
+                                   int out_z, int channels,
+                                   int max_pts_each_voxel,
+                                   const Tensor pts_idx_of_voxels,
+                                   const Tensor argmax, const Tensor grad_out,
+                                   Tensor grad_in, int pool_method);
 
 REGISTER_NPU_IMPL(roiaware_pool3d_forward_impl,
                   roiaware_pool3d_forward_npu);
