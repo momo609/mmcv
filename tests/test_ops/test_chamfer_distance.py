@@ -8,9 +8,10 @@ from mmcv.utils import IS_CUDA_AVAILABLE, IS_NPU_AVAILABLE
 
 
 def chamfer_distance_forward_groundtruth(xyz1, xyz2, dtype):
+    xyz1, xyz2 = xyz1.astype(np.float32), xyz2.astype(np.float32)
     bs, ns, ss = xyz1.shape
-    dist1 = np.zeros((bs, ns)).astype(torch_to_np_type(dtype))
-    dist2 = np.zeros((bs, ns)).astype(torch_to_np_type(dtype))
+    dist1 = np.zeros((bs, ns)).astype(np.float32)
+    dist2 = np.zeros((bs, ns)).astype(np.float32)
     idx1 = np.zeros((bs, ns)).astype('int32')
     idx2 = np.zeros((bs, ns)).astype('int32')
     for b1 in range(bs):
