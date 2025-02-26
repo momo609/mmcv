@@ -56,7 +56,6 @@ from .psa_mask import PSAMask
 from .riroi_align_rotated import RiRoIAlignRotated, riroi_align_rotated
 from .roi_align import RoIAlign, roi_align
 from .roi_align_rotated import RoIAlignRotated, roi_align_rotated
-from .roi_align_rotated_v2 import RoIAlignRotatedV2, roi_align_rotated_v2
 from .roi_pool import RoIPool, roi_pool
 from .roiaware_pool3d import RoIAwarePool3d
 from .roipoint_pool3d import RoIPointPool3d
